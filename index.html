@@ -13,7 +13,7 @@
       }
 
       body {
-        max-width: 210mm;
+      /* max-width: 210mm; */
         margin: 0 auto;
         padding: 0 2.5cm; /* Simulation visuelle des marges sur écran */
         background-color: #ffffff;
@@ -225,27 +225,31 @@
       li {
         margin-bottom: 5px;
       }
+      .page-break{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
     </style>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Open%20Sans:wght@400&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Google%20Sans:wght@400&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400&amp;display=swap" rel="stylesheet"></head>
   <body style="">
     <!-- HEADER INSTITUTIONNEL -->
-    <div class="header-container">
-      <div class="header-left"><br></div>
-      <div class="header-center">
-        <span class="isi-logo">ISI</span><br>
-        Institut Supérieur d'Informatique
+
+
+    <div class="page-break">
+      <div class="logo-container">
+        <img src="logo.jpg" alt="Logo ISI" class="logo" style="width: 100px; height: 100px;">
       </div>
-      <div class="header-right">
+      <h1>Travaux Pratiques N°1<br>Installation et configuration d'Apache Hadoop<br>en mode Pseudo-Distribué</h1>
+      <div class="">
         Année universitaire<br>
         <strong>2025 - 2026</strong>
       </div>
     </div>
 
-    <h1>Travaux Pratiques N°1<br>Installation et configuration d'Apache Hadoop<br>en mode Pseudo-Distribué</h1>
-
-    <div class="subtitle">Cours : Big Data &amp; Analyse de données | Niveau : Licence 3 / Master 1</div>
+    <div class="subtitle">Cours : Big Data &amp; Analyse de données | Niveau : Licence 3 IAGE</div>
     <div class="meta-info">
-      Version du document : 2.0 (Mis à jour pour Hadoop 3.4.3 &amp; Java 21) — Date : Octobre 2025
+      Version du document : 2.0 (Mis à jour pour Hadoop 3.4.3 &amp; Java 21) — Date : Mars 2026
     </div>
 
     <h2>Introduction</h2>
@@ -271,7 +275,7 @@
     </ul>
 
     <div class="box box-info">
-      <strong>Objectif du TP :</strong> Ce guide détaille l'installation pas à pas d'<strong>Apache Hadoop version 3.4.3</strong>
+      <strong>Objectif du TP :</strong> Ce guide détaille l'installation pas à pas d'<strong>Apache Hadoop version</strong>
       <span class="badge badge-hadoop">3.4.3</span> sur le système d'exploitation <strong>Ubuntu 22.04 LTS</strong>.
       Nous utiliserons le <strong>Mode Pseudo-Distribué</strong>.
     </div>
@@ -396,15 +400,15 @@ wget https://dlcdn.apache.org/hadoop/common/hadoop-3.4.3/hadoop-3.4.3.tar.gz
 # Extraction
 tar -xvzf hadoop-3.4.3.tar.gz
 
-# Déplacement vers /usr/local (standard pour les logiciels installés manuellement)
-sudo mv hadoop-3.4.3 /usr/local/hadoop
+# Déplacement vers /opt 
+sudo mv hadoop-3.4.3 /opt/hadoop
 
 # Attribution des droits à l'utilisateur hadoop
-sudo chown -R hadoop:hadoop /usr/local/hadoop
+sudo chown -R hadoop:hadoop /opt/hadoop
 </pre>
 
     <p>Vérification rapide :</p>
-    <pre>ls -l /usr/local/hadoop
+    <pre>ls -l /opt/hadoop
 </pre>
 
     <h2>5. Configuration des variables d'environnement</h2>
@@ -417,7 +421,7 @@ sudo chown -R hadoop:hadoop /usr/local/hadoop
     <p>Ajoutez les lignes suivantes <strong>à la fin du fichier</strong> :</p>
     <pre># ---- Hadoop Environment Variables ----
 export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
-export HADOOP_HOME=/usr/local/hadoop
+export HADOOP_HOME=/opt/hadoop
 export HADOOP_INSTALL=$HADOOP_HOME
 export HADOOP_MAPRED_HOME=$HADOOP_HOME
 export HADOOP_COMMON_HOME=$HADOOP_HOME
@@ -459,7 +463,7 @@ sudo chown -R hadoop:hadoop /home/hadoop/hdfs/
     <pre class="xml">&lt;configuration&gt;
     &lt;property&gt;
         &lt;name&gt;fs.defaultFS&lt;/name&gt;
-        &lt;value&gt;hdfs://localhost:9000&lt;/value&gt;
+        &lt;value&gt;hdfs://localhost:8020&lt;/value&gt;
     &lt;/property&gt;
 &lt;/configuration&gt;
 </pre>
@@ -643,7 +647,7 @@ hdfs dfs -cat output/*
       </thead>
       <tbody>
         <tr>
-          <td><strong>Connection refused</strong> sur localhost:9000</td>
+          <td><strong>Connection refused</strong> sur localhost:8020</td>
           <td>NameNode n'est pas démarré</td>
           <td>Vérifiez les logs dans <code>$HADOOP_HOME/logs/</code>. Avez-vous formaté le NameNode ?</td>
         </tr>
@@ -691,7 +695,7 @@ hdfs dfs -cat output/*
         </tr>
         <tr>
           <td>HDFS NameNode IPC</td>
-          <td>9000</td>
+          <td>8020</td>
           <td>Communication interne Hadoop</td>
         </tr>
         <tr>
@@ -718,7 +722,7 @@ hdfs dfs -cat output/*
     </table>
 
     <h3>Annexe B — Arborescence des fichiers importants</h3>
-    <pre>/usr/local/hadoop/
+    <pre>/opt/hadoop/
 ├── bin/            ← Commandes hadoop, hdfs, yarn, mapred
 ├── sbin/           ← Scripts de démarrage/arrêt (start-all.sh, stop-all.sh...)
 ├── etc/
