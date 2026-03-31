@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TP3 - Déploiement d’un cluster Hadoop 4 nœuds sur AWS EC2 - ISI</title>
+  <style>
+    @page { size: A4 portrait; margin: 2.5cm; }
+    :root {
+      --primary: #1a3a5c;
+      --primary-2: #2c5282;
+      --border: #d8e3f0;
+      --text: #1f2937;
+      --muted: #6b7280;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0 auto;
+      padding: 0 2.5cm 2.5cm;
+      background: #fff;
+      color: var(--text);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 10.5pt;
+      line-height: 1.55;
+    }
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: #f8fbff;
+      border: 1px solid #d8e3f0;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin: 18px 0 24px 0;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+    }
+    .top-nav a {
+      text-decoration: none;
+      background: var(--primary);
+      color: white;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 10pt;
+      font-weight: 600;
+    }
+    .top-nav a.secondary { background: var(--primary-2); }
+    .cover-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+    .logo { width: 100px; height: 100px; object-fit: contain; }
+    h1 {
+      font-size: 18pt;
+      color: var(--primary);
+      text-align: center;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 10px;
+      flex: 1;
+    }
+    .subtitle {
+      text-align: center;
+      font-size: 12pt;
+      color: #444;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .meta-info {
+      text-align: center;
+      font-size: 10pt;
+      color: #666;
+      margin-bottom: 28px;
+      font-style: italic;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.85em;
+      font-weight: bold;
+      color: white;
+      vertical-align: middle;
+      margin-left: 5px;
+    }
+    .badge-hadoop { background-color: #e67e22; }
+    .badge-java { background-color: #e74c3c; }
+    .badge-ubuntu { background-color: #27ae60; }
+    .badge-aws { background-color: #111827; }
+    article { max-width: 100%; }
+    h2 {
+      font-size: 14pt;
+      color: var(--primary);
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
+      margin-top: 30px;
+      margin-bottom: 15px;
+    }
+    h3 {
+      font-size: 12pt;
+      color: var(--primary-2);
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+    p, li { color: var(--text); }
+    ul, ol { padding-left: 24px; }
+    hr { border: 0; border-top: 1px solid #dbe5ef; margin: 28px 0; }
+    pre {
+      background: linear-gradient(180deg, #111827 0%, #0f172a 100%);
+      color: #e5eefb;
+      padding: 14px 16px;
+      border-radius: 12px;
+      overflow-x: auto;
+      font-family: 'Consolas', 'Monaco', 'Cascadia Code', monospace;
+      font-size: 9.4pt;
+      line-height: 1.6;
+      box-shadow: 0 14px 28px rgba(15, 23, 42, 0.15);
+      white-space: pre;
+    }
+    code { font-family: 'Consolas', 'Monaco', monospace; }
+    :not(pre) > code {
+      background: #eef4fb;
+      color: #15324f;
+      padding: 2px 7px;
+      border-radius: 6px;
+      border: 1px solid #d8e3f0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+      font-size: 10pt;
+    }
+    th {
+      background-color: var(--primary);
+      color: white;
+      padding: 8px;
+      text-align: left;
+      border: 1px solid #ddd;
+    }
+    td {
+      padding: 8px;
+      border: 1px solid #ddd;
+      vertical-align: top;
+    }
+    tr:nth-child(even) { background-color: #f8fbff; }
+    .box {
+      padding: 12px 16px;
+      margin: 18px 0;
+      border-left: 5px solid;
+      border-radius: 8px;
+    }
+    .box-info { background-color: #e7f3fe; border-color: #2196f3; color: #0c5460; }
+    .footer {
+      margin-top: 40px;
+      padding-top: 10px;
+      border-top: 1px solid #ccc;
+      font-size: 9pt;
+      text-align: center;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-nav">
+    <a href="index.html">Accueil</a>
+    <a class="secondary" href="tp1.html">TP1</a>
+    <a class="secondary" href="tp2.html">TP2</a>
+    <a class="secondary" href="tp3.html">TP3</a>
+  </div>
+
+  <div class="cover-line">
+    <div class="logo-container">
+      <img src="logo.jpg" alt="Logo ISI" class="logo">
+    </div>
+
+    <h1>
+      Travaux Pratiques N°3<br>
+      Déploiement d’un cluster Apache Hadoop<br>
+      4 nœuds sur AWS EC2
+    </h1>
+
+    <div>
+      Année universitaire<br>
+      <strong>2025 - 2026</strong>
+    </div>
+  </div>
+
+  <div class="subtitle">Cours : Big Data &amp; Analyse de données | Niveau : Licence 3 IAGE</div>
+  <div class="meta-info">
+    Version du document : 1.0 — Hadoop <span class="badge badge-hadoop">3.4.3</span>
+    Java <span class="badge badge-java">21</span>
+    Ubuntu <span class="badge badge-ubuntu">24.04 LTS</span>
+    AWS <span class="badge badge-aws">EC2</span>
+  </div>
+
+  <div class="box box-info"><strong>Objectif du TP :</strong> déployer un cluster Hadoop distribué dans le cloud AWS avec 1 NameNode, 3 DataNodes, HDFS, YARN et un job MapReduce de calcul du chiffre d’affaires par ville.</div>
+
+  <article>
+    <h2>TP : Déploiement d’un cluster Hadoop 4 nœuds sur AWS EC2</h2>
+<p><strong>Objectif</strong> : Installer un cluster Hadoop complet (NameNode + 3 DataNodes) avec YARN et exécuter un job MapReduce de calcul du Chiffre d’Affaires par ville.</p>
+<p><strong>Technologies</strong> : Hadoop 3.4.3, Java 21, Ubuntu 24.04 LTS</p>
+<hr />
+<h2>Étape 0 : Lancement des instances EC2 et Security Group</h2>
+<p>1. Dans la console AWS EC2, lancez <strong>4 instances</strong> avec les paramètres suivants :<br />
+   - AMI : Ubuntu Server 24.04 LTS<br />
+   - Instance type : t3.medium<br />
+   - Key pair : votre clé <code>.pem</code><br />
+   - Volume racine : 30 GiB gp3<br />
+   - Security Group : Créez un groupe nommé <code>hadoop-cluster-sg</code> avec les règles Inbound suivantes :
+<table><thead><tr><th>Type</th><th>Protocole</th><th>Port</th><th>Source</th><th>Description</th></tr></thead><tbody><tr><td>SSH</td><td>TCP</td><td>22</td><td>My IP</td><td>Connexion SSH depuis votre poste</td></tr><tr><td>All traffic</td><td>All</td><td>All</td><td>Security group hadoop-cluster-sg (Self)</td><td>Communication interne entre les nœuds</td></tr><tr><td>Custom TCP</td><td>TCP</td><td>9870</td><td>My IP</td><td>NameNode Web UI</td></tr><tr><td>Custom TCP</td><td>TCP</td><td>8088</td><td>My IP</td><td>YARN ResourceManager UI</td></tr></tbody></table>
+2. Après le lancement, nommez les instances :<br />
+   - master<br />
+   - datanode1<br />
+   - datanode2<br />
+   - datanode3</p>
+<p>Notez l’<strong>IP privée</strong> du master (exemple : 172.31.36.23).</p>
+<hr />
+<h2>Étape 1 : Configuration initiale sur chaque instance</h2>
+<p>Connectez-vous sur chaque instance en tant que <code>ubuntu</code> :</p>
+<pre><code class="language-bash">ssh -i votre-cle.pem ubuntu@&lt;Public-DNS&gt;  
+</code></pre>
+<p>Exécutez les commandes suivantes sur <strong>chaque instance</strong> :</p>
+<pre><code class="language-bash">sudo nano /etc/ssh/sshd_config  
+</code></pre>
+<p>Assurez-vous que ces deux lignes sont présentes et non commentées :</p>
+<pre><code class="language-bash">PasswordAuthentication yes  
+PubkeyAuthentication yes  
+</code></pre>
+<p>Puis redémarrez SSH :</p>
+<pre><code class="language-bash">sudo systemctl restart ssh  
+</code></pre>
+<p>Définissez le hostname :</p>
+<pre><code class="language-bash">sudo hostnamectl set-hostname master          # Sur le master uniquement  
+# sudo hostnamectl set-hostname datanode1     # Sur datanode1  
+# sudo hostnamectl set-hostname datanode2     # Sur datanode2  
+# sudo hostnamectl set-hostname datanode3     # Sur datanode3  
+</code></pre>
+<p>Configurez le fichier hosts :</p>
+<pre><code class="language-bash">sudo nano /etc/hosts  
+</code></pre>
+<p>Ajoutez le contenu suivant (remplacez par vos IPs privées réelles) :</p>
+<pre><code>172.31.36.23    master  
+172.31.39.208   datanode1  
+172.31.xx.xx    datanode2  
+172.31.yy.yy    datanode3  
+127.0.0.1       localhost  
+</code></pre>
+<hr />
+<h2>Étape 2 : Création de l’utilisateur hadoop</h2>
+<p>Sur chaque instance :</p>
+<pre><code class="language-bash">sudo adduser --disabled-password --gecos &quot;&quot; hadoop  
+sudo usermod -aG sudo hadoop  
+sudo passwd hadoop  
+su - hadoop  
+</code></pre>
+<hr />
+<h2>Étape 3 : Installation de Java 21 et Hadoop</h2>
+<pre><code class="language-bash">sudo apt update &amp;&amp; sudo apt install openjdk-21-jdk -y
+
+cd \~  
+wget https://archive.apache.org/dist/hadoop/common/hadoop-3.4.3/hadoop-3.4.3.tar.gz  
+tar -xzf hadoop-3.4.3.tar.gz  
+sudo mv hadoop-3.4.3 /opt/hadoop  
+sudo chown -R hadoop:hadoop /opt/hadoop  
+</code></pre>
+<hr />
+<h2>Étape 4 : Configuration de l’environnement</h2>
+<pre><code class="language-bash">nano \~/.bashrc  
+</code></pre>
+<p>Ajoutez exactement ceci à la fin du fichier :</p>
+<pre><code class="language-bash">export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64  
+export HADOOP_HOME=/opt/hadoop  
+export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop  
+export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin  
+export HADOOP_OPTS=&quot;-Djava.library.path=$HADOOP_HOME/lib/native&quot;  
+</code></pre>
+<p>Appliquez les changements :</p>
+<pre><code class="language-bash">source \~/.bashrc  
+</code></pre>
+<hr />
+<h2>Étape 5 : Configuration SSH sans mot de passe</h2>
+<p>Sur le <strong>master</strong> uniquement :</p>
+<pre><code class="language-bash">ssh-keygen -t rsa -P &quot;&quot; -f \~/.ssh/id_rsa
+
+ssh-copy-id hadoop@datanode1  
+ssh-copy-id hadoop@datanode2  
+ssh-copy-id hadoop@datanode3  
+</code></pre>
+<p>Testez :</p>
+<pre><code class="language-bash">ssh datanode1  
+</code></pre>
+<hr />
+<h2>Étape 6 : Fichiers de configuration Hadoop</h2>
+<pre><code class="language-bash">cd $HADOOP_HOME/etc/hadoop  
+</code></pre>
+<h3>hadoop-env.sh</h3>
+<pre><code class="language-bash">export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64  
+export HADOOP_PID_DIR=/tmp/hadoop-pids  
+export HADOOP_LOG_DIR=/tmp/hadoop-logs  
+</code></pre>
+<h3>core-site.xml</h3>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;  
+&lt;configuration&gt;  
+  &lt;property&gt;  
+    &lt;name&gt;fs.defaultFS&lt;/name&gt;  
+    &lt;value&gt;hdfs://172.31.36.23:8020&lt;/value&gt;  
+  &lt;/property&gt;  
+&lt;/configuration&gt;  
+</code></pre>
+<p><strong>Note</strong> : Remplacez <code>172.31.36.23</code> par l’IP privée réelle de votre master.</p>
+<h3>hdfs-site.xml</h3>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;  
+&lt;configuration&gt;  
+  &lt;property&gt;  
+    &lt;name&gt;dfs.replication&lt;/name&gt;  
+    &lt;value&gt;3&lt;/value&gt;  
+  &lt;/property&gt;  
+  &lt;property&gt;  
+    &lt;name&gt;dfs.namenode.name.dir&lt;/name&gt;  
+    &lt;value&gt;file:///hadoop/dfs/name&lt;/value&gt;  
+  &lt;/property&gt;  
+  &lt;property&gt;  
+    &lt;name&gt;dfs.datanode.data.dir&lt;/name&gt;  
+    &lt;value&gt;file:///hadoop/dfs/data&lt;/value&gt;  
+  &lt;/property&gt;  
+  &lt;property&gt;  
+    &lt;name&gt;dfs.blocksize&lt;/name&gt;  
+    &lt;value&gt;268435456&lt;/value&gt;  
+  &lt;/property&gt;  
+  &lt;property&gt;  
+    &lt;name&gt;dfs.namenode.rpc-bind-host&lt;/name&gt;  
+    &lt;value&gt;0.0.0.0&lt;/value&gt;  
+  &lt;/property&gt;  
+  &lt;property&gt;  
+    &lt;name&gt;dfs.namenode.http-bind-host&lt;/name&gt;  
+    &lt;value&gt;0.0.0.0&lt;/value&gt;  
+  &lt;/property&gt;  
+  &lt;property&gt;  
+    &lt;name&gt;dfs.datanode.address&lt;/name&gt;  
+    &lt;value&gt;0.0.0.0:9866&lt;/value&gt;  
+  &lt;/property&gt;  
+  &lt;property&gt;  
+    &lt;name&gt;dfs.namenode.datanode.registration.ip-hostname-check&lt;/name&gt;  
+    &lt;value&gt;false&lt;/value&gt;  
+  &lt;/property&gt;  
+&lt;/configuration&gt;  
+</code></pre>
+<h3>yarn-site.xml</h3>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;  
+&lt;configuration&gt;  
+  &lt;property&gt;  
+    &lt;name&gt;yarn.resourcemanager.hostname&lt;/name&gt;  
+    &lt;value&gt;master&lt;/value&gt;  
+  &lt;/property&gt;  
+  &lt;property&gt;  
+    &lt;name&gt;yarn.resourcemanager.bind-host&lt;/name&gt;  
+    &lt;value&gt;0.0.0.0&lt;/value&gt;  
+  &lt;/property&gt;  
+  &lt;property&gt;  
+    &lt;name&gt;yarn.nodemanager.aux-services&lt;/name&gt;  
+    &lt;value&gt;mapreduce_shuffle&lt;/value&gt;  
+  &lt;/property&gt;  
+  &lt;property&gt;  
+    &lt;name&gt;yarn.nodemanager.aux-services.mapreduce_shuffle.class&lt;/name&gt;  
+    &lt;value&gt;org.apache.hadoop.mapred.ShuffleHandler&lt;/value&gt;  
+  &lt;/property&gt;  
+  &lt;property&gt;  
+    &lt;name&gt;yarn.nodemanager.resource.memory-mb&lt;/name&gt;  
+    &lt;value&gt;4096&lt;/value&gt;  
+  &lt;/property&gt;  
+  &lt;property&gt;  
+    &lt;name&gt;yarn.nodemanager.env-whitelist&lt;/name&gt;  
+    &lt;value&gt;JAVA_HOME,HADOOP_COMMON_HOME,HADOOP_HDFS_HOME,HADOOP_CONF_DIR,CLASSPATH_PREPEND_DISTCACHE,HADOOP_YARN_HOME,HADOOP_HOME,PATH,LANG,TZ,HADOOP_MAPRED_HOME&lt;/value&gt;  
+  &lt;/property&gt;  
+&lt;/configuration&gt;  
+</code></pre>
+<h3>mapred-site.xml</h3>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;  
+&lt;configuration&gt;  
+  &lt;property&gt;  
+    &lt;name&gt;mapreduce.framework.name&lt;/name&gt;  
+    &lt;value&gt;yarn&lt;/value&gt;  
+  &lt;/property&gt;  
+  &lt;property&gt;  
+    &lt;name&gt;mapreduce.application.classpath&lt;/name&gt;  
+    &lt;value&gt;$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/*:$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/lib/*&lt;/value&gt;  
+  &lt;/property&gt;  
+&lt;/configuration&gt;  
+</code></pre>
+<h3>workers</h3>
+<pre><code class="language-bash">nano workers  
+</code></pre>
+<p>Contenu :</p>
+<pre><code>datanode1  
+datanode2  
+datanode3  
+</code></pre>
+<p>Copiez les fichiers de configuration vers les DataNodes :</p>
+<pre><code class="language-bash">for host in datanode1 datanode2 datanode3; do  
+  scp hadoop-env.sh core-site.xml hdfs-site.xml yarn-site.xml mapred-site.xml workers hadoop@$host:$HADOOP_CONF_DIR/  
+done  
+</code></pre>
+<hr />
+<h2>Étape 7 : Création des répertoires</h2>
+<p>Sur les <strong>4 instances</strong> :</p>
+<pre><code class="language-bash">mkdir -p /hadoop/dfs/name /hadoop/dfs/data /tmp/hadoop-pids /tmp/hadoop-logs  
+sudo chown -R hadoop:hadoop /hadoop /tmp/hadoop-*  
+</code></pre>
+<hr />
+<h2>Étape 8 : Formatage et démarrage</h2>
+<p>Sur le <strong>master</strong> uniquement :</p>
+<pre><code class="language-bash">hdfs namenode -format
+
+start-dfs.sh  
+start-yarn.sh  
+</code></pre>
+<hr />
+<h2>Étape 9 : Vérification</h2>
+<p>Sur le master :</p>
+<pre><code class="language-bash">jps  
+hdfs dfsadmin -report  
+</code></pre>
+<p>Sur chaque datanode :</p>
+<pre><code class="language-bash">jps  
+</code></pre>
+<p>Interfaces web :</p>
+<ul>
+<li>NameNode : http://&lt;Public-IP-du-master&gt;:9870  </li>
+<li>YARN : http://&lt;Public-IP-du-master&gt;:8088</li>
+</ul>
+<hr />
+<h2>Étape 10 : Job MapReduce – Calcul du CA par ville</h2>
+<p>Créez le projet Maven :</p>
+<pre><code class="language-bash">mvn archetype:generate -DgroupId=sn.ehmd -DartifactId=ca-par-ville -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false  
+cd ca-par-ville  
+</code></pre>
+<h3>pom.xml complet</h3>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;  
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot;  
+         xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;  
+         xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;  
+    &lt;groupId&gt;sn.ehmd&lt;/groupId&gt;  
+    &lt;artifactId&gt;ca-par-ville&lt;/artifactId&gt;  
+    &lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;
+
+    &lt;properties&gt;  
+        &lt;maven.compiler.source&gt;21&lt;/maven.compiler.source&gt;  
+        &lt;maven.compiler.target&gt;21&lt;/maven.compiler.target&gt;  
+        &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;  
+        &lt;hadoop.version&gt;3.4.3&lt;/hadoop.version&gt;  
+    &lt;/properties&gt;
+
+    &lt;dependencies&gt;  
+        &lt;dependency&gt;  
+            &lt;groupId&gt;org.apache.hadoop&lt;/groupId&gt;  
+            &lt;artifactId&gt;hadoop-client&lt;/artifactId&gt;  
+            &lt;version&gt;${hadoop.version}&lt;/version&gt;  
+        &lt;/dependency&gt;  
+    &lt;/dependencies&gt;
+
+    &lt;build&gt;  
+        &lt;plugins&gt;  
+            &lt;plugin&gt;  
+                &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;  
+                &lt;artifactId&gt;maven-shade-plugin&lt;/artifactId&gt;  
+                &lt;version&gt;3.5.0&lt;/version&gt;  
+                &lt;executions&gt;  
+                    &lt;execution&gt;  
+                        &lt;phase&gt;package&lt;/phase&gt;  
+                        &lt;goals&gt;  
+                            &lt;goal&gt;shade&lt;/goal&gt;  
+                        &lt;/goals&gt;  
+                        &lt;configuration&gt;  
+                            &lt;transformers&gt;  
+                                &lt;transformer implementation=&quot;org.apache.maven.plugins.shade.resource.ManifestResourceTransformer&quot;&gt;  
+                                    &lt;mainClass&gt;sn.ehmd.TotalSalesByCity&lt;/mainClass&gt;  
+                                &lt;/transformer&gt;  
+                            &lt;/transformers&gt;  
+                        &lt;/configuration&gt;  
+                    &lt;/execution&gt;  
+                &lt;/executions&gt;  
+            &lt;/plugin&gt;  
+        &lt;/plugins&gt;  
+    &lt;/build&gt;  
+&lt;/project&gt;  
+</code></pre>
+<h3>TotalSalesByCity.java</h3>
+<pre><code class="language-java">package sn.ehmd;
+
+import org.apache.hadoop.conf.Configuration;  
+import org.apache.hadoop.fs.Path;  
+import org.apache.hadoop.io.DoubleWritable;  
+import org.apache.hadoop.io.LongWritable;  
+import org.apache.hadoop.io.Text;  
+import org.apache.hadoop.mapreduce.Job;  
+import org.apache.hadoop.mapreduce.Mapper;  
+import org.apache.hadoop.mapreduce.Reducer;  
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;  
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+import java.io.IOException;
+
+public class TotalSalesByCity {
+
+    public static class SalesMapper extends Mapper&lt;LongWritable, Text, Text, DoubleWritable&gt; {  
+        private final Text city \= new Text();  
+        private final DoubleWritable amount \= new DoubleWritable();
+
+        public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {  
+            String line \= value.toString().trim();  
+            if (line.isEmpty()) return;
+
+            String\[\] fields \= line.split(&quot;,&quot;);  
+            if (fields.length &gt;= 2) {  
+                try {  
+                    String cityName \= fields\[0\].trim();  
+                    double saleAmount \= Double.parseDouble(fields\[1\].trim());
+
+                    city.set(cityName);  
+                    amount.set(saleAmount);  
+                    context.write(city, amount);  
+                } catch (NumberFormatException e) {  
+                    System.err.println(&quot;Erreur parsing ligne: &quot; + line);  
+                }  
+            }  
+        }  
+    }
+
+    public static class SalesReducer extends Reducer&lt;Text, DoubleWritable, Text, DoubleWritable&gt; {  
+        private final DoubleWritable total \= new DoubleWritable();
+
+        public void reduce(Text key, Iterable&lt;DoubleWritable&gt; values, Context context)  
+                throws IOException, InterruptedException {  
+            double sum \= 0.0;  
+            for (DoubleWritable val : values) {  
+                sum += val.get();  
+            }  
+            total.set(sum);  
+            context.write(key, total);  
+        }  
+    }
+
+    public static void main(String\[\] args) throws Exception {  
+        Configuration conf \= new Configuration();  
+        Job job \= Job.getInstance(conf, &quot;Total CA par ville&quot;);
+
+        job.setJarByClass(TotalSalesByCity.class);  
+        job.setMapperClass(SalesMapper.class);  
+        job.setReducerClass(SalesReducer.class);
+
+        job.setOutputKeyClass(Text.class);  
+        job.setOutputValueClass(DoubleWritable.class);
+
+        FileInputFormat.addInputPath(job, new Path(args\[0\]));  
+        FileOutputFormat.setOutputPath(job, new Path(args\[1\]));
+
+        System.exit(job.waitForCompletion(true) ? 0 : 1);  
+    }  
+}  
+</code></pre>
+<p><strong>Compilation et exécution</strong> :</p>
+<pre><code class="language-bash">mvn clean package
+
+hdfs dfs -mkdir -p /input  
+hdfs dfs -put purchases.txt /input/
+
+hadoop jar target/ca-par-ville-1.0-SNAPSHOT.jar sn.ehmd.TotalSalesByCity /input/purchases.txt /output-ca
+
+hdfs dfs -cat /output-ca/part-r-00000  
+</code></pre>
+<hr />
+<p><strong>Fin du TP</strong></p>
+<p>Commandes utiles :<br />
+- Arrêt : <code>stop-dfs.sh &amp;&amp; stop-yarn.sh</code><br />
+- Redémarrage : <code>start-dfs.sh &amp;&amp; start-yarn.sh</code></p>
+  </article>
+
+  <div class="footer">ISI — Institut Supérieur d'Informatique | Cours : Big Data &amp; Analyse de données | TP N°3 — Année universitaire 2025-2026</div>
+</body>
+</html>
