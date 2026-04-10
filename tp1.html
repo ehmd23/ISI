@@ -2,6 +2,9 @@
 <html lang="fr" data-theme="light" style=""><head>
     <meta charset="UTF-8">
     <title>TP1 - Installation Hadoop 3.4.3 - ISI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
       /* 
    CONFIGURATION DE LA PAGE (A4)
@@ -10,6 +13,15 @@
       @page {
         size: A4 portrait;
         margin: 2.5cm;
+      }
+
+      :root {
+        --code-bg: #2b2b2b;
+        --code-fg: #a9b7c6;
+        --code-border: #3c3f41;
+        --code-shell: #2ecc71;
+        --code-xml: #5dade2;
+        --code-java: #c678dd;
       }
 
       body {
@@ -125,27 +137,54 @@
         background-color: #e74c3c;
       }
 
-      /* BLOCS DE CODE & TERMINAL */
+      /* BLOCS DE CODE (harmonisés avec TP2–TP4 — accents colorés par type) */
       pre {
-        background-color: #1e1e1e;
-        color: #d4d4d4;
+        background-color: var(--code-bg);
+        color: var(--code-fg);
+        border: 1px solid var(--code-border);
+        border-left: 4px solid var(--code-shell);
+        border-radius: 4px;
         padding: 12px;
-        border-radius: 6px;
         overflow-x: auto;
-        font-family: 'Consolas', 'Monaco', monospace;
-        font-size: 9.5pt;
+        font-family: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+        font-size: 9pt;
+        line-height: 1.55;
+        tab-size: 4;
         margin: 10px 0;
-        white-space: pre-wrap; /* Pour éviter le défilement horizontal à l'impression */
+        white-space: pre-wrap;
       }
+
+      pre code {
+        background: transparent;
+        color: inherit;
+        padding: 0;
+        border: 0;
+        font-family: inherit;
+        font-size: inherit;
+      }
+
+      pre.xml {
+        border-left-color: var(--code-xml);
+      }
+
+      pre.xml .xml-tag { color: #e8bf6a; }
+      pre.xml .xml-attr { color: #bababa; }
+      pre.xml .xml-str { color: #6a8759; }
+      pre.xml .xml-com { color: #7a7a7a; font-style: italic; }
+
+      pre.java {
+        border-left-color: var(--code-java);
+      }
+
+      pre.java .ij-kw { color: #cc7832; }
+      pre.java .ij-cls { color: #4ec9b0; }
+      pre.java .ij-met { color: #ffc66d; }
+      pre.java .ij-var { color: #9876aa; }
+      pre.java .ij-str { color: #6a8759; }
+      pre.java .ij-num { color: #6897bb; }
 
       code {
-        font-family: 'Consolas', 'Monaco', monospace;
-      }
-
-      /* BLOCS XML SPÉCIFIQUE */
-      pre.xml {
-        background-color: #0d2137;
-        border-left: 4px solid #4a90e2;
+        font-family: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
       }
 
       /* TABLEAUX */
@@ -269,6 +308,7 @@
       <a class="secondary" href="tp1.html">TP1</a>
       <a class="secondary" href="tp2.html">TP2</a>
       <a class="secondary" href="tp3.html">TP3</a>
+      <a class="secondary" href="tp4.html">TP4</a>
     </div>
 
     <!-- HEADER INSTITUTIONNEL -->

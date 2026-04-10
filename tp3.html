@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TP3 - Déploiement d’un cluster Hadoop 4 nœuds sur AWS EC2 - ISI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     @page { size: A4 portrait; margin: 2.5cm; }
     :root {
@@ -12,6 +15,13 @@
       --border: #d8e3f0;
       --text: #1f2937;
       --muted: #6b7280;
+      --code-bg: #2b2b2b;
+      --code-fg: #a9b7c6;
+      --code-border: #3c3f41;
+      --code-shell: #2ecc71;
+      --code-xml: #5dade2;
+      --code-java: #c678dd;
+      --code-plain: #f5b041;
     }
     * { box-sizing: border-box; }
     body {
@@ -113,18 +123,43 @@
     ul, ol { padding-left: 24px; }
     hr { border: 0; border-top: 1px solid #dbe5ef; margin: 28px 0; }
     pre {
-      background: linear-gradient(180deg, #111827 0%, #0f172a 100%);
-      color: #e5eefb;
-      padding: 14px 16px;
-      border-radius: 12px;
+      background-color: var(--code-bg);
+      color: var(--code-fg);
+      border: 1px solid var(--code-border);
+      border-left: 4px solid var(--code-shell);
+      border-radius: 4px;
+      padding: 12px;
       overflow-x: auto;
-      font-family: 'Consolas', 'Monaco', 'Cascadia Code', monospace;
-      font-size: 9.4pt;
-      line-height: 1.6;
-      box-shadow: 0 14px 28px rgba(15, 23, 42, 0.15);
-      white-space: pre;
+      font-family: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+      font-size: 9pt;
+      line-height: 1.55;
+      tab-size: 4;
+      margin: 10px 0;
+      white-space: pre-wrap;
     }
-    code { font-family: 'Consolas', 'Monaco', monospace; }
+    pre code {
+      background: transparent !important;
+      color: inherit !important;
+      padding: 0 !important;
+      border: none !important;
+      font-family: inherit;
+      font-size: inherit;
+      line-height: inherit;
+    }
+    pre:has(code.language-bash),
+    pre:has(code.language-sh) {
+      border-left-color: var(--code-shell);
+    }
+    pre:has(code.language-xml) {
+      border-left-color: var(--code-xml);
+    }
+    pre:has(code.language-java) {
+      border-left-color: var(--code-java);
+    }
+    pre:has(code:not([class*="language-"])) {
+      border-left-color: var(--code-plain);
+    }
+    code { font-family: 'JetBrains Mono', 'Consolas', 'Monaco', monospace; }
     :not(pre) > code {
       background: #eef4fb;
       color: #15324f;
@@ -174,6 +209,7 @@
     <a class="secondary" href="tp1.html">TP1</a>
     <a class="secondary" href="tp2.html">TP2</a>
     <a class="secondary" href="tp3.html">TP3</a>
+    <a class="secondary" href="tp4.html">TP4</a>
   </div>
 
   <div class="cover-line">

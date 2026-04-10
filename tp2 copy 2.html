@@ -8,14 +8,6 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     @page { size: A4 portrait; margin: 2.5cm; }
-    :root {
-      --code-bg: #2b2b2b;
-      --code-fg: #a9b7c6;
-      --code-border: #3c3f41;
-      --code-shell: #2ecc71;
-      --code-xml: #5dade2;
-      --code-java: #c678dd;
-    }
     body {
       margin: 0 auto;
       padding: 0 2.5cm;
@@ -77,43 +69,51 @@
     .badge-hadoop { background-color: #e67e22; }
     .badge-java { background-color: #e74c3c; }
     .badge-ubuntu { background-color: #27ae60; }
-    /* Blocs de code harmonisés (shell / XML / Java — lisibilité, bordures colorées) */
     pre {
-      background-color: var(--code-bg);
-      color: var(--code-fg);
-      border: 1px solid var(--code-border);
-      border-left: 4px solid var(--code-shell);
-      border-radius: 4px;
+      background-color: #1e1e1e;
+      color: #d4d4d4;
       padding: 12px;
+      border-radius: 6px;
       overflow-x: auto;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 9.5pt;
+      margin: 10px 0;
+      white-space: pre-wrap;
+    }
+    pre.xml {
+      background-color: #2b2b2b;
+      color: #a9b7c6;
+      border: 1px solid #3c3f41;
+      border-radius: 4px;
+      border-left: 4px solid #4a90e2;
       font-family: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
       font-size: 9pt;
       line-height: 1.55;
       tab-size: 4;
-      margin: 10px 0;
-      white-space: pre-wrap;
     }
-    pre code {
-      background: transparent;
-      color: inherit;
-      padding: 0;
-      border: 0;
-      font-family: inherit;
-      font-size: inherit;
-    }
-    pre.xml { border-left-color: var(--code-xml); }
     pre.xml .xml-tag { color: #e8bf6a; }
     pre.xml .xml-attr { color: #bababa; }
     pre.xml .xml-str { color: #6a8759; }
     pre.xml .xml-com { color: #7a7a7a; font-style: italic; }
-    pre.java { border-left-color: var(--code-java); }
+    /* Thème éditeur IntelliJ Darcula (sombre) */
+    pre.java {
+      background-color: #2b2b2b;
+      color: #a9b7c6;
+      border: 1px solid #3c3f41;
+      border-radius: 4px;
+      border-left: 4px solid #4e7a9e;
+      font-family: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+      font-size: 9pt;
+      line-height: 1.55;
+      tab-size: 4;
+    }
     pre.java .ij-kw { color: #cc7832; }
     pre.java .ij-cls { color: #4ec9b0; }
     pre.java .ij-met { color: #ffc66d; }
     pre.java .ij-var { color: #9876aa; }
     pre.java .ij-str { color: #6a8759; }
     pre.java .ij-num { color: #6897bb; }
-    code { font-family: 'JetBrains Mono', 'Consolas', 'Monaco', monospace; }
+    code { font-family: 'Consolas', 'Monaco', monospace; }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -204,7 +204,6 @@
     <a class="secondary" href="tp1.html">TP1</a>
     <a class="secondary" href="tp2.html">TP2</a>
     <a class="secondary" href="tp3.html">TP3</a>
-    <a class="secondary" href="tp4.html">TP4</a>
   </div>
 
   <div class="cover-line">
