@@ -614,6 +614,41 @@ hadoop jar target/totalSales-1.0-SNAPSHOT.jar sn.ehmd.TotalSalesByCity /input/pu
 
 hdfs dfs -cat /output-ca/part-r-00000</pre>
 
+  <h3>11.6 Analyses complémentaires (même jeu de données)</h3>
+  <p>Après le job <strong>TotalSalesByCity</strong> (CA total par ville), vous réutilisez le <strong>même</strong> fichier <code>purchases.txt</code> en entrée HDFS. Chaque analyse consiste à adapter le couple <strong>clé / valeur</strong> émis par le mapper (et si besoin le type de la valeur) tout en conservant le principe d’<strong>agrégation par clé</strong> dans le reducer. Vous interprétez ensuite les sorties produites sur le cluster.</p>
+  <p>Rappel sur les champs (séparateur tabulation <code>\t</code>) : date, heure, <strong>ville</strong> (index 2), <strong>catégorie</strong> (index 3), <strong>montant</strong> (index 4), <strong>moyen de paiement</strong> (index 5).</p>
+
+  <div class="box box-info">
+    <strong>Entrée et sorties HDFS :</strong> gardez <code>/input/purchases.txt</code> comme entrée commune. Pour chaque nouveau job, utilisez un <strong>répertoire de sortie distinct</strong> (HDFS refuse d’écraser un dossier déjà existant), par exemple <code>/output-ca-paiement</code>, <code>/output-ca-categorie</code>, <code>/output-nb-par-ville</code>. Supprimez ou choisissez un autre chemin si besoin : <code>hdfs dfs -rm -r -f &lt;chemin&gt;</code>.
+  </div>
+
+  <h4>Analyse 1 — Chiffre d’affaires total par moyen de paiement</h4>
+  <p><strong>Objectif :</strong> agréger le CA par type de carte ou paiement (Visa, MasterCard, Cash, Amex, Discover, etc.).</p>
+  <p><strong>Travail attendu :</strong> job MapReduce dans lequel le mapper émet la paire <strong>(moyen de paiement, montant)</strong> et le reducer additionne les montants pour chaque moyen de paiement (même logique que le CA par ville, autre clé). Exécution sur <code>/input/purchases.txt</code>.</p>
+  <p><strong>Livrables :</strong></p>
+  <ul>
+    <li>copie d’écran ou extrait texte de la sortie (<code>hdfs dfs -cat</code> sur un fichier <code>part-r-*</code> du répertoire de sortie choisi) ;</li>
+    <li>une phrase d’interprétation : quel moyen de paiement concentre le plus de chiffre d’affaires sur cet extrait ?</li>
+  </ul>
+
+  <h4>Analyse 2 — Chiffre d’affaires total par catégorie de produit</h4>
+  <p><strong>Objectif :</strong> agréger le CA par catégorie (ex. Toys, DVDs, Men’s Clothing, …).</p>
+  <p><strong>Travail attendu :</strong> mapper qui émet <strong>(catégorie, montant)</strong> ; reducer par somme des montants par catégorie.</p>
+  <p><strong>Livrables :</strong></p>
+  <ul>
+    <li>sortie HDFS du job ;</li>
+    <li>identification des <strong>trois</strong> catégories les plus « rentables » sur l’extrait (d’après les totaux produits par Hadoop ou recalcul manuel pour vérification).</li>
+  </ul>
+
+  <h4>Analyse 3 — Nombre de transactions par ville</h4>
+  <p><strong>Objectif :</strong> compter combien de lignes (transactions) existent par ville. Sur le fichier du TP, une ville n’apparaît qu’une fois ; le pattern reste utile pour des jeux plus volumineux où une même ville se répète.</p>
+  <p><strong>Travail attendu :</strong> mapper qui émet <strong>(ville, 1)</strong> (valeur entière ou réelle « 1 » selon le type choisi) ; reducer qui <strong>somme</strong> ces valeurs par ville (la somme représente le nombre de transactions).</p>
+  <p><strong>Livrables :</strong></p>
+  <ul>
+    <li>sortie HDFS du job ;</li>
+    <li>court paragraphe comparant ce job au <strong>CA par ville</strong> : même clé « ville », mais <strong>mesure différente</strong> (comptage vs somme des montants) et conséquence sur la lecture des résultats.</li>
+  </ul>
+
   <div class="box box-success">
     <strong>Félicitations !</strong> Vous avez déployé un cluster Hadoop distribué et exécuté un job MapReduce métier.
   </div>
