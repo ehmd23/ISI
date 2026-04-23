@@ -1,0 +1,172 @@
+services:
+  postgres-metastore:
+    image: postgres:16-alpine
+    container_name: postgres-metastore
+    environment:
+      POSTGRES_DB: metastore_db
+      POSTGRES_USER: hive
+      POSTGRES_PASSWORD: hivepassword
+    volumes:
+      - postgres-metastore-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - hadoop-net
+    restart: unless-stopped
+
+  postgres-hue:
+    image: postgres:16-alpine
+    container_name: postgres-hue
+    environment:
+      POSTGRES_DB: hue_db
+      POSTGRES_USER: hue
+      POSTGRES_PASSWORD: huepassword
+    volumes:
+      - postgres-hue-data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    networks:
+      - hadoop-net
+    restart: unless-stopped
+
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    hostname: namenode
+    environment:
+      CLUSTER_NAME: test
+      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
+      CORE_CONF_hadoop_proxyuser_hue_hosts: "*"
+      CORE_CONF_hadoop_proxyuser_hue_groups: "*"
+      HDFS_CONF_dfs_webhdfs_enabled: "true"
+      HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check: "false"
+    volumes:
+      - namenode-data:/hadoop/dfs/name
+      - ./transactions:/transactions
+    ports:
+      - "9870:9870"   # HDFS Web UI
+      - "9000:9000"   # RPC
+    networks:
+      - hadoop-net
+    restart: unless-stopped
+
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode
+    hostname: datanode
+    environment:
+      CLUSTER_NAME: test
+      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
+    volumes:
+      - datanode-data:/hadoop/dfs/data
+    ports:
+      - "9864:9864"
+    networks:
+      - hadoop-net
+    depends_on:
+      - namenode
+    restart: unless-stopped
+
+  resourcemanager:
+    image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
+    container_name: resourcemanager
+    hostname: resourcemanager
+    environment:
+      CLUSTER_NAME: test
+      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
+      CORE_CONF_hadoop_proxyuser_hue_hosts: "*"
+      CORE_CONF_hadoop_proxyuser_hue_groups: "*"
+    ports:
+      - "8088:8088"   # YARN Web UI
+      - "8032:8032"
+    networks:
+      - hadoop-net
+    depends_on:
+      - namenode
+      - datanode
+    restart: unless-stopped
+
+  nodemanager:
+    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
+    container_name: nodemanager
+    hostname: nodemanager
+    environment:
+      CLUSTER_NAME: test
+      CORE_CONF_fs_defaultFS: hdfs://namenode:9000
+      CORE_CONF_hadoop_proxyuser_hue_hosts: "*"
+      CORE_CONF_hadoop_proxyuser_hue_groups: "*"
+    ports:
+      - "8042:8042"
+    networks:
+      - hadoop-net
+    depends_on:
+      - resourcemanager
+    restart: unless-stopped
+
+  hive-metastore:
+    image: hive-with-postgres:4.2.0
+    container_name: hive-metastore
+    command: ["--service", "metastore"]
+    environment:
+      SERVICE_NAME: metastore
+      DB_DRIVER: postgres
+      SERVICE_OPTS: >
+        -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver
+        -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://postgres-metastore:5432/metastore_db
+        -Djavax.jdo.option.ConnectionUserName=hive
+        -Djavax.jdo.option.ConnectionPassword=hivepassword
+    volumes:
+      - hive-warehouse:/opt/hive/data/warehouse
+    depends_on:
+      - postgres-metastore
+    networks:
+      - hadoop-net
+    restart: unless-stopped
+
+  hive-server2:
+    image: hive-with-postgres:4.2.0
+    container_name: hive-server2
+    command: ["--service", "hiveserver2"]
+    environment:
+      SERVICE_NAME: hiveserver2
+      SERVICE_OPTS: >
+        -Dhive.metastore.uris=thrift://hive-metastore:9083
+        -Dhive.execution.engine=tez
+        -Dhadoop.fs.defaultFS=hdfs://namenode:9000
+        -Dfs.defaultFS=hdfs://namenode:9000
+    ports:
+      - "10000:10000"   # Thrift / JDBC
+      - "10002:10002"   # HiveServer2 Web UI
+    volumes:
+      - hive-warehouse:/opt/hive/data/warehouse
+    depends_on:
+      - hive-metastore
+      - resourcemanager
+    networks:
+      - hadoop-net
+    restart: unless-stopped
+
+  hue:
+    image: gethue/hue:latest
+    container_name: hue
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./hue/hue.ini:/usr/share/hue/desktop/conf/hue.ini:ro
+    depends_on:
+      - hive-server2
+      - postgres-hue
+    networks:
+      - hadoop-net
+    restart: unless-stopped
+
+volumes:
+  postgres-metastore-data:
+  postgres-hue-data:
+  namenode-data:
+  datanode-data:
+  hive-warehouse:
+
+networks:
+  hadoop-net:
+    driver: bridge
